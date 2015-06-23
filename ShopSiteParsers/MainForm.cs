@@ -29,7 +29,7 @@ namespace ShopSiteParsers
             parser.ParsingFinished += parser_ParsingFinished;
             btnStartParse.Enabled = false;
 
-            Task.Factory.StartNew(() => parser.Run(chMan.Checked));
+            Task.Factory.StartNew(() => parser.Run());
         }
 
         void parser_ParsingFinished()
@@ -61,6 +61,7 @@ namespace ShopSiteParsers
 
             e.Item = new ListViewItem(valueToShow.Category);
 
+            e.Item.SubItems.Add(new ListViewItem.ListViewSubItem(e.Item, valueToShow.Subcategory));
             e.Item.SubItems.Add(new ListViewItem.ListViewSubItem(e.Item, valueToShow.Code));
             e.Item.SubItems.Add(new ListViewItem.ListViewSubItem(e.Item, valueToShow.Name));
             e.Item.SubItems.Add(new ListViewItem.ListViewSubItem(e.Item, valueToShow.Price));
@@ -92,10 +93,12 @@ namespace ShopSiteParsers
 
             foreach (var merchRow in listToExport.Select(listOfMerch => string.Join(",",
                 AddQuotes(listOfMerch.Category),
+                AddQuotes(listOfMerch.Subcategory),
+                AddQuotes(listOfMerch.Sex),
                 AddQuotes(listOfMerch.Code),
                 AddQuotes(listOfMerch.Name),
                 AddQuotes(listOfMerch.Image),
-                string.Join(",", AddQuotes(listOfMerch.Avail.Color), AddQuotes(listOfMerch.Avail.Quantity), AddQuotes(listOfMerch.Avail.Size)),
+                string.Join(",", AddQuotes(listOfMerch.Avail.Color), AddQuotes(listOfMerch.Avail.Quantity.ToString(CultureInfo.InvariantCulture)), AddQuotes(listOfMerch.Avail.Size)),
                 AddQuotes(listOfMerch.Price),
                 (chMult.Checked ? double.Parse(listOfMerch.Price, CultureInfo.InvariantCulture) * updater : double.Parse(listOfMerch.Price, CultureInfo.InvariantCulture) + updater).ToString("0.00", CultureInfo.InvariantCulture),
                 AddQuotes(listOfMerch.Consist)
@@ -104,7 +107,7 @@ namespace ShopSiteParsers
                 sb.AppendLine(merchRow);
             }
 
-            using (TextWriter writer = File.CreateText(string.Format("./fn_{0}{1}.csv", cbCategories.SelectedItem, chMan.Checked ? "m" : "w"))) 
+            using (TextWriter writer = File.CreateText(string.Format("./fn_{0}.csv", cbCategories.SelectedItem))) 
             {
                 writer.Write(sb.ToString());
             }
@@ -116,10 +119,6 @@ namespace ShopSiteParsers
                 sb2.AppendLine(merchRow.Key);
             }
 
-            using (TextWriter writer = File.CreateText(string.Format("./colors{0}.csv",chMan.Checked ? "m" : "w")))
-            {
-                writer.Write(sb2.ToString());
-            }
         }
 
         private string AddQuotes(string baseString)

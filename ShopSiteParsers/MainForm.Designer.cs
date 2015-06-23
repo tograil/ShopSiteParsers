@@ -39,7 +39,7 @@
             this.cbCategories = new System.Windows.Forms.ComboBox();
             this.tbPriceMultiplier = new System.Windows.Forms.TextBox();
             this.chMult = new System.Windows.Forms.CheckBox();
-            this.chMan = new System.Windows.Forms.CheckBox();
+            this.clSubcategory = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.SuspendLayout();
             // 
             // btnStartParse
@@ -56,6 +56,7 @@
             // 
             this.lvTovars.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.clCategory,
+            this.clSubcategory,
             this.clCode,
             this.clName,
             this.clPrice,
@@ -135,22 +136,16 @@
             this.chMult.UseVisualStyleBackColor = true;
             this.chMult.Visible = false;
             // 
-            // chMan
+            // clSubcategory
             // 
-            this.chMan.AutoSize = true;
-            this.chMan.Location = new System.Drawing.Point(360, 289);
-            this.chMan.Name = "chMan";
-            this.chMan.Size = new System.Drawing.Size(47, 17);
-            this.chMan.TabIndex = 6;
-            this.chMan.Text = "Man";
-            this.chMan.UseVisualStyleBackColor = true;
+            this.clSubcategory.Text = "Subcategory";
+            this.clSubcategory.Width = 80;
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(614, 320);
-            this.Controls.Add(this.chMan);
             this.Controls.Add(this.chMult);
             this.Controls.Add(this.tbPriceMultiplier);
             this.Controls.Add(this.cbCategories);
@@ -178,7 +173,7 @@
         private System.Windows.Forms.ComboBox cbCategories;
         private System.Windows.Forms.TextBox tbPriceMultiplier;
         private System.Windows.Forms.CheckBox chMult;
-        private System.Windows.Forms.CheckBox chMan;
+        private System.Windows.Forms.ColumnHeader clSubcategory;
     }
 }
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -6,6 +7,7 @@ using System.Net;
 using System.Text.RegularExpressions;
 using System.Web;
 using HtmlAgilityPack;
+using ShopSiteParsers.Constants;
 using ShopSiteParsers.Models;
 
 namespace ShopSiteParsers.SiteParser
@@ -18,7 +20,16 @@ namespace ShopSiteParsers.SiteParser
         public event Action<MerchandiseItem> ItemAdded;
         public event Action ParsingFinished;
 
-        private const string manUrl = "http://www.vestoitaliano.it/index.php?cPath=1_2&cPathName=ABBIGLIAMENTO";
+        private readonly KeyValuePair<string, string>[] _urls = new []
+        {
+            new KeyValuePair<string, string> ("http://www.vestoitaliano.it/index.php", "ж"),
+            new KeyValuePair<string, string> ("http://www.vestoitaliano.it/index.php?cPath=38_108&cPathName=A%D0%BA%D1%81%D0%B5%D1%81%D1%81%D1%83%D0%B0%D1%80%D1%8B", "ж"),
+            new KeyValuePair<string, string> ("http://www.vestoitaliano.it/index.php?cPath=1_2&cPathName=ABBIGLIAMENTO", "м"),
+            new KeyValuePair<string, string> ("http://www.vestoitaliano.it/index.php?cPath=1_94&cPathName=A%D0%BA%D1%81%D0%B5%D1%81%D1%81%D1%83%D0%B0%D1%80%D1%8B", "м"),
+   
+        };
+
+        private const string ManUrl = "http://www.vestoitaliano.it/index.php?cPath=1_2&cPathName=ABBIGLIAMENTO";
 
         private void Login()
         {
@@ -111,12 +122,38 @@ namespace ShopSiteParsers.SiteParser
         }
 
 
-        public void Run(bool man)
+        public void Run()
         {
 
             Login();
 
-            var data = GetSiteData(man ? manUrl : "http://www.vestoitaliano.it/index.php");
+            foreach (var url in _urls)
+            {
+                var data = GetSiteData(url.Key);
+
+                var document = new HtmlDocument();
+
+                document.LoadHtml(data);
+
+                var menu = document.DocumentNode.SelectNodes("//ul[@class=\"categories\"]")[2];
+
+                foreach (var childNode in menu.ChildNodes)
+                {
+                    var a = childNode.Descendants("a").First();
+                    var link = HttpUtility.HtmlDecode(a.GetAttributeValue("href", ""));
+                    var name = HttpUtility.HtmlDecode(a.InnerText);
+
+                    ParseCategory(name, link, url.Value);
+                }
+            }
+
+            if (ParsingFinished != null)
+                ParsingFinished();
+        }
+
+        private void ParseCategory(string name, string url, string sex)
+        {
+            var data = GetSiteData(url);
 
             var document = new HtmlDocument();
 
@@ -124,20 +161,18 @@ namespace ShopSiteParsers.SiteParser
 
             var menu = document.DocumentNode.SelectNodes("//ul[@class=\"categories\"]")[2];
 
-            foreach (var childNode in menu.ChildNodes)
+            var subcategories = menu.SelectNodes(".//li//a[not(span)]");
+
+            foreach (var subcategory in subcategories)
             {
-                var a = childNode.Descendants("a").First();
-                var link = HttpUtility.HtmlDecode(a.GetAttributeValue("href", ""));
-                var name = HttpUtility.HtmlDecode(a.InnerText);
+                var subcat = HttpUtility.HtmlDecode(subcategory.Descendants("div").First().InnerText);
+                var link = HttpUtility.HtmlDecode(subcategory.GetAttributeValue("href", ""));
 
-                ParseCategory(name, link);
+                ParseSubcategory(name, subcat, link, sex);
             }
-
-            if (ParsingFinished != null)
-                ParsingFinished();
         }
 
-        private void ParseCategory(string name, string url)
+        private void ParseSubcategory(string category, string subcategory, string url, string sex)
         {
             do
             {
@@ -149,9 +184,14 @@ namespace ShopSiteParsers.SiteParser
 
                 var options = document.DocumentNode.SelectNodes("//li[@class=\"wrapper_prods hover first last\"]");
 
+                if (options == null)
+                {
+                    return;
+                }
+
                 foreach (var option in options)
                 {
-                    ParseProperty(name, option);
+                    ParseProperty(category, subcategory, option, sex);
                 }
 
                 var pages = document.DocumentNode.SelectNodes("//a[@class=\"pageResults\"]");
@@ -163,7 +203,7 @@ namespace ShopSiteParsers.SiteParser
             } while (!string.IsNullOrEmpty(url));
         }
 
-        private void ParseProperty(string category, HtmlNode option)
+        private void ParseProperty(string category, string subcategory, HtmlNode option, string sex)
         {
             var price =
                 Regex.Match(option.InnerHtml, @"<h2 class=""price price_padd fl_left"">(?<price>[0-9.]+?) &euro;</h2>",
@@ -190,7 +230,7 @@ namespace ShopSiteParsers.SiteParser
                             {
                                 Color = m.Groups["color"].Value,
                                 Size = m.Groups["size"].Value,
-                                Quantity = m.Groups["quantity"].Value
+                                Quantity = int.Parse(m.Groups["quantity"].Value)
                             })
                     .ToArray();
 
@@ -232,12 +272,19 @@ namespace ShopSiteParsers.SiteParser
             foreach (var item in sizes.SelectMany(size => images.Select(image => new MerchandiseItem
             {
                 Category = category,
-                Code = string.Join("-", code, size.Color, size.Size),
+                Subcategory = subcategory,
+                Code = string.Join("-", code, size.Color),
                 Name = title,
-                Avail = size,
+                Avail = new MerchandiseItem.Availability
+                {
+                    Color = RusColors.Colors[size.Color],
+                    Size = size.Size,
+                    Quantity = sizes.Where(size1 => size.Color == size1.Color).Sum(size1 => size1.Quantity)
+                },
                 Image = image,
                 Price = price,
-                Consist = consist.Any() ? consist.Last() : string.Empty
+                Consist = consist.Any() ? consist.Last() : string.Empty,
+                Sex = sex
             })))
             {
                 ItemAdded(item);
