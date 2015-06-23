@@ -1,0 +1,12 @@
+D:\Projects\ShopSiteParsers\ShopSiteParsers\bin\Debug\ShopSiteParsers.exe.config
+D:\Projects\ShopSiteParsers\ShopSiteParsers\bin\Debug\ShopSiteParsers.exe
+D:\Projects\ShopSiteParsers\ShopSiteParsers\bin\Debug\ShopSiteParsers.pdb
+D:\Projects\ShopSiteParsers\ShopSiteParsers\obj\Debug\ShopSiteParsers.csprojResolveAssemblyReference.cache
+D:\Projects\ShopSiteParsers\ShopSiteParsers\obj\Debug\ShopSiteParsers.MainForm.resources
+D:\Projects\ShopSiteParsers\ShopSiteParsers\obj\Debug\ShopSiteParsers.Properties.Resources.resources
+D:\Projects\ShopSiteParsers\ShopSiteParsers\obj\Debug\ShopSiteParsers.csproj.GenerateResource.Cache
+D:\Projects\ShopSiteParsers\ShopSiteParsers\obj\Debug\ShopSiteParsers.exe
+D:\Projects\ShopSiteParsers\ShopSiteParsers\obj\Debug\ShopSiteParsers.pdb
+D:\Projects\ShopSiteParsers\ShopSiteParsers\bin\Debug\HtmlAgilityPack.dll
+D:\Projects\ShopSiteParsers\ShopSiteParsers\bin\Debug\HtmlAgilityPack.pdb
+D:\Projects\ShopSiteParsers\ShopSiteParsers\bin\Debug\HtmlAgilityPack.xml
