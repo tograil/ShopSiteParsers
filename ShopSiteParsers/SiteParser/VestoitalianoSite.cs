@@ -279,7 +279,7 @@ namespace ShopSiteParsers.SiteParser
                 {
                     Color = RusColors.Colors[size.Color],
                     Size = size.Size,
-                    Quantity = sizes.Where(size1 => size.Color == size1.Color).Sum(size1 => size1.Quantity)
+                    Quantity = size.Quantity
                 },
                 Image = image,
                 Price = price,
