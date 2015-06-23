@@ -22,10 +22,10 @@ namespace ShopSiteParsers.SiteParser
 
         private readonly KeyValuePair<string, string>[] _urls = new []
         {
-            new KeyValuePair<string, string> ("http://www.vestoitaliano.it/index.php", "ж"),
-            new KeyValuePair<string, string> ("http://www.vestoitaliano.it/index.php?cPath=38_108&cPathName=A%D0%BA%D1%81%D0%B5%D1%81%D1%81%D1%83%D0%B0%D1%80%D1%8B", "ж"),
-            new KeyValuePair<string, string> ("http://www.vestoitaliano.it/index.php?cPath=1_2&cPathName=ABBIGLIAMENTO", "м"),
-            new KeyValuePair<string, string> ("http://www.vestoitaliano.it/index.php?cPath=1_94&cPathName=A%D0%BA%D1%81%D0%B5%D1%81%D1%81%D1%83%D0%B0%D1%80%D1%8B", "м"),
+            new KeyValuePair<string, string> ("http://www.vestoitaliano.it/index.php", "для нее"),
+            new KeyValuePair<string, string> ("http://www.vestoitaliano.it/index.php?cPath=38_108&cPathName=A%D0%BA%D1%81%D0%B5%D1%81%D1%81%D1%83%D0%B0%D1%80%D1%8B", "для нее"),
+            new KeyValuePair<string, string> ("http://www.vestoitaliano.it/index.php?cPath=1_2&cPathName=ABBIGLIAMENTO", "для него"),
+            new KeyValuePair<string, string> ("http://www.vestoitaliano.it/index.php?cPath=1_94&cPathName=A%D0%BA%D1%81%D0%B5%D1%81%D1%81%D1%83%D0%B0%D1%80%D1%8B", "для него"),
    
         };
 
