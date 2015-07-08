@@ -48,7 +48,7 @@ namespace ShopSiteParsers.SiteParser
 
             AddMaterials(categories);
 
-            var items = PushToCallback(categories, null);
+			var items = PushToCallback(categories, new string[] { });
 
             if (ParsingFinished != null)
                 ParsingFinished(items);
@@ -151,7 +151,7 @@ namespace ShopSiteParsers.SiteParser
             }
         }
 
-        private static IEnumerable<MerchandiseItem> PushToCallback(List<Category> categories, string parentCategory)
+        private static IEnumerable<MerchandiseItem> PushToCallback(List<Category> categories, string[] parentCategory)
         {
             var x = categories.SelectMany(category => 
                 category.Goods.SelectMany(good => 
@@ -160,25 +160,26 @@ namespace ShopSiteParsers.SiteParser
                     
                 new MerchandiseItem
                 {
-                    Category = string.IsNullOrEmpty(parentCategory) ? category.Name : parentCategory,
-                    Subcategory = string.IsNullOrEmpty(parentCategory) ? string.Empty : category.Name,
+                    CategoriesPath = parentCategory.Concat(new [] { category.Name }).ToArray(),
+                    //Subcategory = string.IsNullOrEmpty(parentCategory) ? string.Empty : category.Name,
                     Avail = new MerchandiseItem.Availability
                     {
                         Color = param.Color,
                         Quantity = int.Parse(param.Quantity.Trim()),
-                        Size = param.Quantity
+                        Size = param.Size.Trim()
                     },
                     Price = good.Price,
                     Name = good.Name,
                     Code = good.VendorCode,
                     Consist = good.Material,
-                    Sex = string.Empty,
-                    Image = photo
-
+					Sex = parentCategory.Concat(new[] { category.Name }).Any(cat => cat.Contains("мужск") || cat.Contains("мальчи")) ? "для него" :
+						parentCategory.Concat(new[] { category.Name }).Any(cat => cat.Contains("жен") || cat.Contains("девоч")) ? "для нее" : string.Empty,
+                    Image = photo,
+					Country = good.Country
 
                 })))).ToList();
 
-            x.AddRange(categories.SelectMany(category => PushToCallback(category.Children, category.Name)));
+			x.AddRange(categories.SelectMany(category => PushToCallback(category.Children, parentCategory.Concat(new[] { category.Name }).ToArray())));
 
             return x;
         }

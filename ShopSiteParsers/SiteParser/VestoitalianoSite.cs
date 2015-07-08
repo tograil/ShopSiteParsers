@@ -271,6 +271,7 @@ namespace ShopSiteParsers.SiteParser
             {
                 Category = category,
                 Subcategory = subcategory,
+				CategoriesPath = null,
                 Code = string.Join("-", code, size.Color),
                 Name = title,
                 Avail = new MerchandiseItem.Availability
@@ -282,7 +283,8 @@ namespace ShopSiteParsers.SiteParser
                 Image = image,
                 Price = price,
                 Consist = consist.Any() ? Regex.Replace(consist.Last(), @"<[^>]+>|&nbsp;", string.Empty) : string.Empty,
-                Sex = sex
+                Sex = sex,
+				Country = "Италия"
             })))
             {
                 ItemAdded(item);

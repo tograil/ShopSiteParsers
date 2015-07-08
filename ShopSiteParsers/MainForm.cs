@@ -45,8 +45,8 @@ namespace ShopSiteParsers
                 }
 
                 cbCategories.Items.Add("All");
-                cbCategories.Items.AddRange(_merchandiseItems.GroupBy(item => item.Category).Select(catItem => (object)catItem.Key).ToArray());
-                cbCategories.SelectedIndex = 0;
+                //cbCategories.Items.AddRange(_merchandiseItems.GroupBy(item => item.Category).Select(catItem => (object)catItem.Key).ToArray());
+                //cbCategories.SelectedIndex = 0;
                 tbPriceMultiplier.Visible = true;
                 chMult.Visible = true;
                 cbCategories.Visible = true;
@@ -88,36 +88,39 @@ namespace ShopSiteParsers
 
             MerchandiseItem[] listToExport;
 
-            if (cbCategories.SelectedItem.ToString() == "All")
+			if (cbCategories.SelectedItem== null || cbCategories.SelectedItem.ToString() == "All")
                 listToExport = _merchandiseItems.ToArray();
             else
                 listToExport = _merchandiseItems.GroupBy(item => item.Category)
                 .First(item => item.Key == cbCategories.SelectedItem.ToString()).ToArray();
 
+	        var maxCategories = _merchandiseItems.Max(item => item.CategoriesPath != null ? item.CategoriesPath.Length : 2);
+
             if (_merchandiseItems.Count > 20000)
             {
                 listToExport = _merchandiseItems.Take(20000).ToArray();
 
-                Save(listToExport, updater, 0);
+                Save(listToExport, updater, 0, maxCategories);
 
                 listToExport = _merchandiseItems.Skip(20000).ToArray();
 
-                Save(listToExport, updater, 1);
+                Save(listToExport, updater, 1, maxCategories);
 
                 return;
             }
             
 
-            Save(listToExport, updater, 0);
+            Save(listToExport, updater, 0, maxCategories);
         }
 
-        private void Save(IEnumerable<MerchandiseItem> listToExport, double updater, int index)
+        private void Save(IEnumerable<MerchandiseItem> listToExport, double updater, int index, int maxCategories)
         {
             var sb = new StringBuilder();
 
             foreach (var merchRow in listToExport.Select(listOfMerch => string.Join(",",
-                AddQuotes(listOfMerch.Category),
-                AddQuotes(listOfMerch.Subcategory),
+				string.Join(",", listOfMerch.CategoriesPath != null ?
+				listOfMerch.CategoriesPath.Select(AddQuotes).Concat(Enumerable.Repeat(AddQuotes(string.Empty), maxCategories - listOfMerch.CategoriesPath.Length)) :
+                new[] { AddQuotes(listOfMerch.Category), AddQuotes(listOfMerch.Subcategory) }),
                 AddQuotes(listOfMerch.Sex),
                 AddQuotes(listOfMerch.Code),
                 AddQuotes(listOfMerch.Name),
@@ -131,14 +134,14 @@ namespace ShopSiteParsers
                     : double.Parse(listOfMerch.Price, CultureInfo.InvariantCulture) + updater)*Kurs).ToString("0.00",
                         CultureInfo.InvariantCulture),
                 AddQuotes(listOfMerch.Consist),
-                AddQuotes(listOfMerch.Subcategory),
-                AddQuotes("Италия")
+				AddQuotes(listOfMerch.CategoriesPath != null ?  listOfMerch.CategoriesPath.Last() : listOfMerch.Subcategory),
+                AddQuotes(listOfMerch.Country)
                 )))
             {
                 sb.AppendLine(merchRow);
             }
 
-            using (TextWriter writer = File.CreateText(string.Format("./fn_{0}_{1}.csv", cbCategories.SelectedItem, index)))
+            using (TextWriter writer = File.CreateText(string.Format("./fn_{0}_{1}.csv", cbCategories.SelectedItem ?? "All", index)))
             {
                 writer.Write(sb.ToString());
             }

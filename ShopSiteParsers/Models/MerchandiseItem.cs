@@ -11,6 +11,8 @@ namespace ShopSiteParsers.Models
             public double Quantity { get; set; }
         }
 
+		public string[] CategoriesPath { get; set; }
+		
         public string Category { get; set; }
         public string Subcategory { get; set; }
         public string Code { get; set; }
@@ -20,6 +22,7 @@ namespace ShopSiteParsers.Models
         public string Image { get; set; }
         public string Consist { get; set; }
         public string Sex { get; set; }
+		public string Country { get; set; }
 
     }
 }

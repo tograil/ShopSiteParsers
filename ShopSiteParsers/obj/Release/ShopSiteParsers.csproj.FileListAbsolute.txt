@@ -10,3 +10,15 @@ D:\Projects\ShopSiteParsers\ShopSiteParsers\obj\Release\ShopSiteParsers.Properti
 D:\Projects\ShopSiteParsers\ShopSiteParsers\obj\Release\ShopSiteParsers.csproj.GenerateResource.Cache
 D:\Projects\ShopSiteParsers\ShopSiteParsers\obj\Release\ShopSiteParsers.exe
 D:\Projects\ShopSiteParsers\ShopSiteParsers\obj\Release\ShopSiteParsers.pdb
+f:\MyData\ShopSiteParsers\ShopSiteParsers\bin\Release\ShopSiteParsers.exe.config
+f:\MyData\ShopSiteParsers\ShopSiteParsers\obj\Release\ShopSiteParsers.exe
+f:\MyData\ShopSiteParsers\ShopSiteParsers\obj\Release\ShopSiteParsers.pdb
+f:\MyData\ShopSiteParsers\ShopSiteParsers\bin\Release\ShopSiteParsers.exe
+f:\MyData\ShopSiteParsers\ShopSiteParsers\bin\Release\ShopSiteParsers.pdb
+f:\MyData\ShopSiteParsers\ShopSiteParsers\bin\Release\HtmlAgilityPack.dll
+f:\MyData\ShopSiteParsers\ShopSiteParsers\bin\Release\HtmlAgilityPack.pdb
+f:\MyData\ShopSiteParsers\ShopSiteParsers\bin\Release\HtmlAgilityPack.xml
+f:\MyData\ShopSiteParsers\ShopSiteParsers\obj\Release\ShopSiteParsers.csprojResolveAssemblyReference.cache
+f:\MyData\ShopSiteParsers\ShopSiteParsers\obj\Release\ShopSiteParsers.MainForm.resources
+f:\MyData\ShopSiteParsers\ShopSiteParsers\obj\Release\ShopSiteParsers.Properties.Resources.resources
+f:\MyData\ShopSiteParsers\ShopSiteParsers\obj\Release\ShopSiteParsers.csproj.GenerateResource.Cache
