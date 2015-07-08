@@ -15,6 +15,8 @@ namespace ShopSiteParsers
     public partial class MainForm : Form
     {
         private readonly List<MerchandiseItem> _merchandiseItems = new List<MerchandiseItem>();
+
+        private const double Kurs = 1;//61.41;
         
         public MainForm()
         {
@@ -23,7 +25,7 @@ namespace ShopSiteParsers
 
         private void btnStartParse_Click(object sender, EventArgs e)
         {
-            var parser = new VestoitalianoSite();
+            var parser = new ToBuySite();
 
             parser.ItemAdded += parser_ItemAdded;
             parser.ParsingFinished += parser_ParsingFinished;
@@ -32,10 +34,16 @@ namespace ShopSiteParsers
             Task.Factory.StartNew(() => parser.Run());
         }
 
-        void parser_ParsingFinished()
+        void parser_ParsingFinished(IEnumerable<MerchandiseItem> items)
         {
             lvTovars.Invoke(new Action(() =>
             {
+                if (items != null)
+                {
+                    _merchandiseItems.AddRange(items);
+                    lvTovars.VirtualListSize = _merchandiseItems.Count;
+                }
+
                 cbCategories.Items.Add("All");
                 cbCategories.Items.AddRange(_merchandiseItems.GroupBy(item => item.Category).Select(catItem => (object)catItem.Key).ToArray());
                 cbCategories.SelectedIndex = 0;
@@ -84,11 +92,27 @@ namespace ShopSiteParsers
                 listToExport = _merchandiseItems.ToArray();
             else
                 listToExport = _merchandiseItems.GroupBy(item => item.Category)
-                .First(item => item.Key == cbCategories.SelectedItem.ToString()).ToArray();    
+                .First(item => item.Key == cbCategories.SelectedItem.ToString()).ToArray();
+
+            if (_merchandiseItems.Count > 20000)
+            {
+                listToExport = _merchandiseItems.Take(20000).ToArray();
+
+                Save(listToExport, updater, 0);
+
+                listToExport = _merchandiseItems.Skip(20000).ToArray();
+
+                Save(listToExport, updater, 1);
+
+                return;
+            }
             
 
-            
+            Save(listToExport, updater, 0);
+        }
 
+        private void Save(IEnumerable<MerchandiseItem> listToExport, double updater, int index)
+        {
             var sb = new StringBuilder();
 
             foreach (var merchRow in listToExport.Select(listOfMerch => string.Join(",",
@@ -98,30 +122,29 @@ namespace ShopSiteParsers
                 AddQuotes(listOfMerch.Code),
                 AddQuotes(listOfMerch.Name),
                 AddQuotes(listOfMerch.Image),
-                string.Join(",", AddQuotes(listOfMerch.Avail.Color), AddQuotes(listOfMerch.Avail.Quantity.ToString(CultureInfo.InvariantCulture)), AddQuotes(listOfMerch.Avail.Size)),
+                string.Join(",", AddQuotes(listOfMerch.Avail.Color),
+                    AddQuotes(listOfMerch.Avail.Quantity.ToString(CultureInfo.InvariantCulture)),
+                    AddQuotes(listOfMerch.Avail.Size)),
                 AddQuotes(listOfMerch.Price),
-                (chMult.Checked ? double.Parse(listOfMerch.Price, CultureInfo.InvariantCulture) * updater : double.Parse(listOfMerch.Price, CultureInfo.InvariantCulture) + updater).ToString("0.00", CultureInfo.InvariantCulture),
-                AddQuotes(listOfMerch.Consist)
+                ((chMult.Checked
+                    ? double.Parse(listOfMerch.Price, CultureInfo.InvariantCulture)*updater
+                    : double.Parse(listOfMerch.Price, CultureInfo.InvariantCulture) + updater)*Kurs).ToString("0.00",
+                        CultureInfo.InvariantCulture),
+                AddQuotes(listOfMerch.Consist),
+                AddQuotes(listOfMerch.Subcategory),
+                AddQuotes("Италия")
                 )))
             {
                 sb.AppendLine(merchRow);
             }
 
-            using (TextWriter writer = File.CreateText(string.Format("./fn_{0}.csv", cbCategories.SelectedItem))) 
+            using (TextWriter writer = File.CreateText(string.Format("./fn_{0}_{1}.csv", cbCategories.SelectedItem, index)))
             {
                 writer.Write(sb.ToString());
             }
-
-            var sb2 = new StringBuilder();
-
-            foreach (var merchRow in listToExport.GroupBy(ls => ls.Avail.Color))
-            {
-                sb2.AppendLine(merchRow.Key);
-            }
-
         }
 
-        private string AddQuotes(string baseString)
+        private static string AddQuotes(string baseString)
         {
             return string.Format("\"{0}\"", baseString);
         }

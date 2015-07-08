@@ -12,24 +12,22 @@ using ShopSiteParsers.Models;
 
 namespace ShopSiteParsers.SiteParser
 {
-    public class VestoitalianoSite
+    public class VestoitalianoSite : ISite
     {
 
         private string _cookie = string.Empty;
 
         public event Action<MerchandiseItem> ItemAdded;
-        public event Action ParsingFinished;
+        public event Action<IEnumerable<MerchandiseItem>> ParsingFinished;
 
         private readonly KeyValuePair<string, string>[] _urls = new []
         {
             new KeyValuePair<string, string> ("http://www.vestoitaliano.it/index.php", "для нее"),
             new KeyValuePair<string, string> ("http://www.vestoitaliano.it/index.php?cPath=38_108&cPathName=A%D0%BA%D1%81%D0%B5%D1%81%D1%81%D1%83%D0%B0%D1%80%D1%8B", "для нее"),
             new KeyValuePair<string, string> ("http://www.vestoitaliano.it/index.php?cPath=1_2&cPathName=ABBIGLIAMENTO", "для него"),
-            new KeyValuePair<string, string> ("http://www.vestoitaliano.it/index.php?cPath=1_94&cPathName=A%D0%BA%D1%81%D0%B5%D1%81%D1%81%D1%83%D0%B0%D1%80%D1%8B", "для него"),
+            new KeyValuePair<string, string> ("http://www.vestoitaliano.it/index.php?cPath=1_94&cPathName=A%D0%BA%D1%81%D0%B5%D1%81%D1%81%D1%83%D0%B0%D1%80%D1%8B", "для него")
    
         };
-
-        private const string ManUrl = "http://www.vestoitaliano.it/index.php?cPath=1_2&cPathName=ABBIGLIAMENTO";
 
         private void Login()
         {
@@ -148,7 +146,7 @@ namespace ShopSiteParsers.SiteParser
             }
 
             if (ParsingFinished != null)
-                ParsingFinished();
+                ParsingFinished(null);
         }
 
         private void ParseCategory(string name, string url, string sex)
@@ -250,7 +248,7 @@ namespace ShopSiteParsers.SiteParser
                     .Cast<Match>()
                     .Select(
                         m => m.Groups[1].Value).ToArray();
-            
+
             
                             
 
@@ -283,7 +281,7 @@ namespace ShopSiteParsers.SiteParser
                 },
                 Image = image,
                 Price = price,
-                Consist = consist.Any() ? consist.Last() : string.Empty,
+                Consist = consist.Any() ? Regex.Replace(consist.Last(), @"<[^>]+>|&nbsp;", string.Empty) : string.Empty,
                 Sex = sex
             })))
             {
