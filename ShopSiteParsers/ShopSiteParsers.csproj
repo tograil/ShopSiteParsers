@@ -61,7 +61,10 @@
     <Compile Include="Models\MerchandiseItem.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SiteParser\AdiontSite.cs" />
     <Compile Include="SiteParser\ISite.cs" />
+    <Compile Include="SiteParser\LeoStoreSite.cs" />
+    <Compile Include="SiteParser\SiteBase.cs" />
     <Compile Include="SiteParser\VestoitalianoSite.cs" />
     <Compile Include="SiteParser\ToBuySite.cs" />
     <EmbeddedResource Include="MainForm.resx">
