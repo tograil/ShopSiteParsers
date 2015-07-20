@@ -26,7 +26,7 @@ namespace ShopSiteParsers
         private void btnStartParse_Click(object sender, EventArgs e)
         {
             //var parser = new ToBuySite();
-            var parser = new LeoStoreSite();
+            var parser = new AdiontSite();
 
             parser.ItemAdded += parser_ItemAdded;
             parser.ParsingFinished += parser_ParsingFinished;
