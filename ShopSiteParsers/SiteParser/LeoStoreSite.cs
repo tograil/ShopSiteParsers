@@ -82,8 +82,8 @@ namespace ShopSiteParsers.SiteParser
 
                 foreach (var pl in productLinks)
                 {
-                    products = GetProduct(string.Format("{0}{1}", siteAddress, pl));
-					Array.ForEach(products, (x) => { x.Sex = genderTitle; if (ItemAdded != null) ItemAdded(x); });
+                    products = GetProduct(string.Format("{0}{1}", siteAddress, pl),genderTitle);
+					Array.ForEach(products, x => { if (ItemAdded != null) ItemAdded(x); });
 					result.AddRange(products);
                 }
 
@@ -95,7 +95,7 @@ namespace ShopSiteParsers.SiteParser
 			return result;
         }
 
-        private MerchandiseItem[] GetProduct(string url)
+        private MerchandiseItem[] GetProduct(string url, string genderTitle)
         {
 			MerchandiseItem[] result;
 
@@ -166,11 +166,11 @@ namespace ShopSiteParsers.SiteParser
 				consist = consist.Substring(1);
 
 			var color = Regex.Match(page, @"Цвета:</b>\s*</strong>\s*<ul class=""values"">\s*<li>\s*<a.+?background-color: (?<color>[#0-9A-Fa-f]+)", RegexOptions.IgnoreCase).Groups["color"].Value;
-			var avails = document.DocumentNode.SelectNodes(@"//td[@class=""key h1 vmiddle""]").Select(x => Regex.Matches(x.InnerHtml, @"(?<size>[^\(]+)\((?<quantity>[\d+])\s*в наличии\)", RegexOptions.IgnoreCase).Cast<Match>().Select(y => new MerchandiseItem.Availability() { Size = y.Groups["size"].Value.Trim(), Quantity = int.Parse(y.Groups["quantity"].Value), Color = RusColors.Colors[color] }).FirstOrDefault()).ToArray();
+			var avails = document.DocumentNode.SelectNodes(@"//td[@class=""key h1 vmiddle""]").Select(x => Regex.Matches(x.InnerHtml, @"(?<size>[^\(]+)\((?<quantity>[\d+])\s*в наличии\)", RegexOptions.IgnoreCase).Cast<Match>().Select(y => new MerchandiseItem.Availability() { Size = y.Groups["size"].Value.Trim(), Quantity = int.Parse(y.Groups["quantity"].Value), Color = RusColors.Colors[color] }).FirstOrDefault()).Where(val => val != null).ToArray();
 
 			var images = document.DocumentNode.SelectNodes(@"//div[@class=""article_images""]//img").Select(x => x.GetAttributeValue("src", "").IndexOf("nopic") == -1 ? string.Format("{0}{1}", siteAddress, x.GetAttributeValue("src", "").Replace("_small_", "_zoom_")) : string.Empty);
 
-			result = images.SelectMany(x => avails.Select(y => new MerchandiseItem { Category = category, Name = name, Code = code, Price = price, Consist = consist.Trim(), Avail = y, Image = x })).ToArray();
+            result = images.SelectMany(x => avails.Select(y => new MerchandiseItem { CategoriesPath = new [] { genderTitle, category, string.Empty }, Name = name, Code = code, Price = price.Replace(" €", string.Empty).Replace(",", "."), Consist = consist.Trim().Replace("Снаружи:", string.Empty), Avail = y, Image = x, Sex = genderTitle, Country = "Германия"})).ToArray();
 			return result;
         }
     }

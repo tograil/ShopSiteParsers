@@ -133,7 +133,7 @@ namespace ShopSiteParsers.SiteParser
                     VendorCode = line[8],
                     Description = line.Length >= 10 ?  line[9] : string.Empty,
                     Country = line.Length >= 11 ? line[10] : string.Empty,
-                    Material = string.Join(" ", (goodmaterials.FirstOrDefault(material => string.Equals(material[0].Trim(), line[0].Trim())) ?? Enumerable.Repeat(string.Empty, 3)).Skip(1)),
+                    Material = string.Join(" ", goodmaterials.Where(material => string.Equals(material[0].Trim(), line[0].Trim())).Select(material => string.Join(" ", material.Skip(1).Concat(new [] { "%" })))),
                     Params = goodquantities.Where(quan => string.Equals(quan[0], line[0])).Select(quan => new GoodParam { Color = quan[1], Size = quan[2], Quantity = quan[3]}).ToList(),
                     Photos = photos.Where(photo => string.Equals(photo[1], line[0])).Select(photo => photo[3]).ToList()
                     

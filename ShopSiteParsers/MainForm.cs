@@ -16,7 +16,7 @@ namespace ShopSiteParsers
     {
         private readonly List<MerchandiseItem> _merchandiseItems = new List<MerchandiseItem>();
 
-        private const double Kurs = 1;//61.41;
+        private const double Kurs = 61.41;
         
         public MainForm()
         {
@@ -26,7 +26,9 @@ namespace ShopSiteParsers
         private void btnStartParse_Click(object sender, EventArgs e)
         {
             //var parser = new ToBuySite();
-            var parser = new AdiontSite();
+            //var parser = new AdiontSite();
+
+            var parser = new LeoStoreSite();
 
             parser.ItemAdded += parser_ItemAdded;
             parser.ParsingFinished += parser_ParsingFinished;

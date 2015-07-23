@@ -22,3 +22,4 @@ f:\MyData\ShopSiteParsers\ShopSiteParsers\obj\Release\ShopSiteParsers.csprojReso
 f:\MyData\ShopSiteParsers\ShopSiteParsers\obj\Release\ShopSiteParsers.MainForm.resources
 f:\MyData\ShopSiteParsers\ShopSiteParsers\obj\Release\ShopSiteParsers.Properties.Resources.resources
 f:\MyData\ShopSiteParsers\ShopSiteParsers\obj\Release\ShopSiteParsers.csproj.GenerateResource.Cache
+D:\Projects\ShopSiteParsers\ShopSiteParsers\bin\Release\Excel.4.5.dll
