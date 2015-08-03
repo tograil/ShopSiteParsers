@@ -26,26 +26,18 @@ namespace ShopSiteParsers.SiteParser
 
         public override void Run()
         {
-            //Login();
-            //var forMale = GetProductsForGender("male", "для него");
-            //var forFemale = GetProductsForGender("female", "для нее");
-
-            //var result = forMale.Union(forFemale);
-            //if (ParsingFinished != null)
-            //    ParsingFinished(result);
-
-			//cookie = "2dc87bd3c455f21273b9d4e4d537b256=e2ab840e7fb1cbb59b2337a98ae55315; virtuemart=e2ab840e7fb1cbb59b2337a98ae55315; _ym_visorc_25511984=w";
-			//cookie = "2dc87bd3c455f21273b9d4e4d537b256=0d4b9c6970d63c182edaed78b8c8499a; virtuemart=e2ab840e7fb1cbb59b2337a98ae55315;";
-			//var p = LoadPage("http://www.adiont.ru/");
-			var xx = GetProduct("http://www.adiont.ru/shop/rasprodazha/kollekts-ya-figl/m361-briuki-bezh");
 			Login();
 			GetProductsAvailability();
-			
-			//var grpLinks = GetGroups();
-			//foreach (var l in grpLinks)
-			//{
-			//	GetProductsForGroup(l);
-			//}
+			var groups = GetGroupLinks();
+			var result = groups.SelectMany(x => GetProductsForGroup(x)).ToArray();
+			//SerializeToFile(t, @"d:\\o.txt");
+
+			//var t = DeserializeFromFile(@"d:\\o.txt") as MerchandiseItem[];
+			//var tt = t.Select(x => x.Name).Distinct().Count();
+			//var result = UnionItemsWithAvailability(t);
+
+			if (ParsingFinished != null)
+				ParsingFinished(result);
         }
         #endregion
 
@@ -78,14 +70,11 @@ namespace ShopSiteParsers.SiteParser
 			req.Accept = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8";
 			req.AllowAutoRedirect = false;
 			req.Headers[HttpRequestHeader.Cookie] = cookie;
-			//req.Headers[HttpRequestHeader.Cookie] = cookie = "2dc87bd3c455f21273b9d4e4d537b256=9b3353f2058bb8c19a053ce9b2638cee; virtuemart=9b3353f2058bb8c19a053ce9b2638cee; _ym_visorc_25511984=w";
 			req.UserAgent = "Mozilla/5.0 (Windows NT 6.3; WOW64; rv:39.0) Gecko/20100101 Firefox/39.0";
 			var ttt = System.Uri.EscapeDataString(password);
 			using (var writer = new StreamWriter(req.GetRequestStream()))
 			{
-				//var ttt1 = string.Format("username=import_data&passwd=%3E8t%24Pe%24u&Submit=&option=com_user&task=login&return=http%3A%2F%2Fwww.adiont.ru%2F&{2}=1", userName, System.Uri.EscapeDataString(password), token);
 				writer.Write(string.Format("username={0}&passwd={1}&Submit=&option=com_user&task=login&{2}=1", userName, System.Uri.EscapeDataString(password), token));
-				//writer.Write(string.Format("username=import_data&passwd=%3E8t%24Pe%24u&Submit=&option=com_user&task=login&return=http%3A%2F%2Fwww.adiont.ru%2F&eda8a2ff995604e1d6a656c01ce38183=1"));
 			}
 			
 			using (var r = (HttpWebResponse)req.GetResponse())
@@ -97,7 +86,6 @@ namespace ShopSiteParsers.SiteParser
 					cookie = Regex.Replace(cookie, string.Format("{0}=[^;]+", match.Groups["key"].Value), string.Format("{0}={1}", match.Groups["key"].Value, match.Groups["value"].Value));
 				}
 			}
-			//var p = LoadPage(siteAddress);
         }
 
         private string[] GetGroupLinks()
@@ -110,50 +98,71 @@ namespace ShopSiteParsers.SiteParser
 
         private IEnumerable<MerchandiseItem> GetProductsForGroup(string grpLink)
         {
+            List<MerchandiseItem> result = new List<MerchandiseItem>();
+
             var page = LoadPage(grpLink);
 
             var productLinks = Regex.Matches(page, @"<div class=""good-title""[^>]+>\s*<a href=""(?<link>[^""]+)""").Cast<Match>().Select(x => string.Format("{0}{1}", siteAddress, x.Groups["link"].Value)).ToArray();
 
-            MerchandiseItem[] products;
+            List<MerchandiseItem> products;
 
             foreach (var pl in productLinks)
             {
                 products = GetProduct(pl);
-                //Array.ForEach(products, (x) => { x.Sex = genderTitle; if (ItemAdded != null) ItemAdded(x); });
-                //result.AddRange(products);
+                //Array.ForEach(products, (x) => { x.Sex = "для неё"; if (ItemAdded != null) ItemAdded(x); });
+                result.AddRange(products);
             }
 
-            return null;
+            return result;
         }
 
-		private MerchandiseItem[] GetProduct(string url)
+		private List<MerchandiseItem> GetProduct(string url)
 		{
-			MerchandiseItem[] result;
+			List<MerchandiseItem> result = new List<MerchandiseItem>();
 
-			var document = new HtmlAgilityPack.HtmlDocument();
+			try
+			{
+				var document = new HtmlAgilityPack.HtmlDocument();
 
-			var page = LoadPage(url);
-			document.LoadHtml(page);
-			var t = document.DocumentNode.SelectNodes("//div[@class=\"vitrina\"]//div[@class=\"content\"]").First().SelectNodes("div").Skip(1).First().InnerHtml;
+				var page = LoadPage(url);
+				document.LoadHtml(page);
+				var t = document.DocumentNode.SelectNodes("//div[@class=\"vitrina\"]//div[@class=\"content\"]").First().SelectNodes("div").Skip(1).First().InnerHtml;
+				t = Regex.Replace(t, @"<a[^>]+.+?</a>", string.Empty).Replace("/", string.Empty).Trim();
+				var title = Regex.Match(t, @"(?<title>[^<]+)<").Groups["title"].Value.Trim();
+				t = document.DocumentNode.SelectNodes("//div[@class=\"detailprice\"]").First().InnerHtml;
+				var price = Regex.Replace(t.Replace("</span>", string.Empty), @"<span[^>]*>", " ").Trim();
 
-			var title = Regex.Match(t, @"</a>\s*/\s*(?<title>[^<]+)").Groups["title"].Value.Trim();
-			t = document.DocumentNode.SelectNodes("//div[@class=\"text\"]").First().InnerHtml;
-			var consist = Regex.Match(t, @"Состав(:)?(?<consist>[^<]+)").Groups["consist"].Value.Trim();
+				t = document.DocumentNode.SelectNodes("//div[@class=\"text\"]").First().InnerHtml;
+				var consist = Regex.Match(t, @"Состав(:)?(?<consist>[^<]+)").Groups["consist"].Value.Trim();
+				var color = Regex.Match(page, @"Цвет (?<color>.+?)\.").Value.Trim();
+				t = document.DocumentNode.SelectSingleNode("//ul[@id=\"thumblist\"]").InnerHtml;
+				var images1 = Regex.Matches(t, @"largeimage:\s*'(?<img>[^']+)'").Cast<Match>().Select(x => x.Groups["img"].Value.StartsWith("http://") ? x.Groups["img"].Value : string.Format("{0}/{1}", siteAddress, x.Groups["img"].Value));
+				var images2 = Regex.Matches(page, @"href=""(?<img>[^""]+)""\s*rel=""lightbox""").Cast<Match>().Select(x => x.Groups["img"].Value.IndexOf("javascript:void(0);") > -1 ? string.Empty : x.Groups["img"].Value.StartsWith("http://") ? x.Groups["img"].Value : string.Format("{0}/{1}", siteAddress, x.Groups["img"].Value));
+				var images = images1.Union(images2);
 
-			//t = document.DocumentNode.SelectNodes("//div[@class=\"detailprice\"]").First().InnerHtml;
-			//var price = Regex.Replace(t.Replace("</span>", string.Empty), @"<span[^>]*>", " ").Trim();
+				// Color записываю в параметр Category, так как категории нет, а Avail будет формироваться на основании excel-документа
 
-			return null;
+				var tt = images.Select(x => new MerchandiseItem { Name = title, Price = price, Consist = consist, Category = color, Image = x }).ToArray();
+				Array.ForEach(tt, x => result.AddRange(UnionItemWithAvailability(x)));
+			}
+			catch
+			{
+
+			}
+
+			return result;
 		}
 
 		private void GetProductsAvailability()
 		{
 			var page = LoadPage("http://www.adiont.ru/opt-blank");
 			var l = Regex.Match(page, @"href=""(?<link>.+?)""[^>]*>Бланк заказа по наличию").Groups["link"].Value;
+
+			//string l = "dsadsd";
+			//FileStream stream = File.Open("d:\\1\\blank_zakaza_01082015.xls", FileMode.Open, FileAccess.Read);
+			//var excelReader = ExcelReaderFactory.CreateBinaryReader(stream);
 			if (!string.IsNullOrWhiteSpace(l))
 			{
-				//FileStream stream = File.Open("d:\\1\\blank_zakaza_18072015.xls", FileMode.Open, FileAccess.Read);
-				//var excelReader = ExcelReaderFactory.CreateBinaryReader(stream);
 				var ms = DownloadFile(string.Format("{0}{1}", siteAddress, l));
 				var excelReader = ExcelReaderFactory.CreateBinaryReader(ms);
 
@@ -161,11 +170,46 @@ namespace ShopSiteParsers.SiteParser
 				for (int i = 8; i < excelReader.AsDataSet().Tables[0].Rows.Count; i++)
 				{
 					s = excelReader.AsDataSet().Tables[0].Rows[i][0].ToString();
-					var t = Regex.Match(s, @"(?<name>.+?)(\s*(?<color>цвет [^\s]+))?(\s*размер)?\s+(?<size>\S+?)$");
-					if (t != null)
+					var t = Regex.Match(s, @"(?<name>.+?)(\s*(?<color>цвет [^\s]+))?(\s*размер)?\s+(?<size>\S+?)(\s*SALE)?$");
+					if (t != null && !string.IsNullOrWhiteSpace(t.Groups["name"].Value))
 						productAvailabilities.Add(new AvailabilityInfo { NameParts = t.Groups["name"].Value.Split(' '), Size = t.Groups["size"].Value, Color = t.Groups["color"] != null ? t.Groups["color"].Value : null });
 				}
 			}
+		}
+
+		private List<MerchandiseItem> UnionItemWithAvailability(MerchandiseItem item)
+		{
+			List<MerchandiseItem> result = new List<MerchandiseItem>();
+
+			var t = productAvailabilities.Where(x => HasItemNameParts(item, x.NameParts)).Select(x => new { Item = item, Av = x }).ToArray();
+			if (t.Length == 0)
+				t = productAvailabilities.Where(x => HasItemNameParts(item, x.NameParts.Skip(1).ToArray())).Select(x => new { Item = item, Av = x }).ToArray();
+
+			if (t.Length > 0)
+			{
+				var tt = t.Where(x => string.Compare(x.Item.Category, x.Av.Color) == 0 || x.Item.Name.IndexOf(x.Av.Color, StringComparison.InvariantCultureIgnoreCase) > -1).ToArray();
+				if (tt.Length > 0)
+					t = tt;
+
+				Array.ForEach(t, (x) =>
+					{
+						if (result.Where(y => string.Compare(y.Name, x.Item.Name) == 0 && string.Compare(y.Image, x.Item.Image) == 0 && string.Compare(y.Avail.Color, x.Av.Color) == 0 && string.Compare(y.Avail.Size, x.Av.Size) == 0).Count() == 0)
+						{
+							var xx = new MerchandiseItem { Name = x.Item.Name, Price = x.Item.Price, Consist = x.Item.Consist, Image = x.Item.Image, Avail = new MerchandiseItem.Availability { Color = x.Av.Color, Size = x.Av.Size, Quantity = 1 } };
+							result.Add(xx);
+							if (ItemAdded != null) ItemAdded(xx);
+						}
+					});
+			}
+
+			return result;
+		}
+
+		private bool HasItemNameParts(MerchandiseItem item, string[] nameParts)
+		{
+			if (item == null || string.IsNullOrWhiteSpace(item.Name) || nameParts == null || nameParts.Length == 0)
+				return false;
+			return nameParts.Count(x => item.Name.IndexOf(x) > -1) == nameParts.Length;
 		}
 
 		public class AvailabilityInfo

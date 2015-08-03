@@ -83,5 +83,29 @@ namespace ShopSiteParsers.SiteParser
 
 			return ms;
 		}
+
+        protected void SerializeToFile(object o, string filepath)
+        {
+            using (MemoryStream ms = new MemoryStream())
+            {
+                var bf = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
+                bf.Serialize(ms, o);
+
+                byte[] b = ms.ToArray();
+                File.WriteAllBytes(filepath, b);
+            }
+        }
+        protected object DeserializeFromFile(string filepath)
+        {
+            var b = File.ReadAllBytes(filepath);
+            using (MemoryStream ms = new MemoryStream(b))
+            {
+
+                var bf = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
+                var o = bf.Deserialize(ms);
+
+                return o;
+            }
+        }
     }
 }
