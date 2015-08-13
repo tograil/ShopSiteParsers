@@ -54,6 +54,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Constants\Categories.cs" />
     <Compile Include="Constants\Colors.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>

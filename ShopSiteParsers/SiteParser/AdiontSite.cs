@@ -1,4 +1,5 @@
 ﻿using Excel;
+using ShopSiteParsers.Constants;
 using ShopSiteParsers.Models;
 using System;
 using System.Collections.Generic;
@@ -140,9 +141,10 @@ namespace ShopSiteParsers.SiteParser
 				var images2 = Regex.Matches(page, @"href=""(?<img>[^""]+)""\s*rel=""lightbox""").Cast<Match>().Select(x => x.Groups["img"].Value.IndexOf("javascript:void(0);") > -1 ? string.Empty : x.Groups["img"].Value.StartsWith("http://") ? x.Groups["img"].Value : string.Format("{0}/{1}", siteAddress, x.Groups["img"].Value));
 				var images = images1.Union(images2);
 
-				// Color записываю в параметр Category, так как категории нет, а Avail будет формироваться на основании excel-документа
+				// Color записываю в параметр Subcategory, так как категории нет, а Avail будет формироваться на основании excel-документа
+				string category = RusCategories.Categories.Where(x => title.IndexOf(x.Key, StringComparison.InvariantCultureIgnoreCase) > -1).Select(x => x.Value).FirstOrDefault();
 
-				var tt = images.Select(x => new MerchandiseItem { Name = title, Price = price, Consist = consist, Category = color, Image = x }).ToArray();
+				var tt = images.Select(x => new MerchandiseItem { Name = title, Category = category, Price = price, Consist = consist, Subcategory = color, Image = x }).ToArray();
 				Array.ForEach(tt, x => result.AddRange(UnionItemWithAvailability(x)));
 			}
 			catch
@@ -187,7 +189,7 @@ namespace ShopSiteParsers.SiteParser
 
 			if (t.Length > 0)
 			{
-				var tt = t.Where(x => string.Compare(x.Item.Category, x.Av.Color) == 0 || x.Item.Name.IndexOf(x.Av.Color, StringComparison.InvariantCultureIgnoreCase) > -1).ToArray();
+				var tt = t.Where(x => string.Compare(x.Item.Subcategory, x.Av.Color) == 0 || x.Item.Name.IndexOf(x.Av.Color, StringComparison.InvariantCultureIgnoreCase) > -1).ToArray();
 				if (tt.Length > 0)
 					t = tt;
 
