@@ -136,7 +136,7 @@ namespace ShopSiteParsers.SiteParser
 
         private IEnumerable<MerchandiseItem> GetProductsForGroup(string[] categories, string grpLink)
         {
-            List<MerchandiseItem> result = new List<MerchandiseItem>();
+            var result = new List<MerchandiseItem>();
 
             var page = LoadPage(grpLink);
 
