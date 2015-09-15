@@ -10,3 +10,4 @@ D:\Projects\ShopSiteParsers\ShopSiteParsers\obj\Debug\ShopSiteParsers.pdb
 D:\Projects\ShopSiteParsers\ShopSiteParsers\bin\Debug\HtmlAgilityPack.dll
 D:\Projects\ShopSiteParsers\ShopSiteParsers\bin\Debug\HtmlAgilityPack.pdb
 D:\Projects\ShopSiteParsers\ShopSiteParsers\bin\Debug\HtmlAgilityPack.xml
+D:\Projects\ShopSiteParsers\ShopSiteParsers\bin\Debug\Excel.4.5.dll

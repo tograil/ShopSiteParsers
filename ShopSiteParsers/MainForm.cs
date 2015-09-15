@@ -16,7 +16,7 @@ namespace ShopSiteParsers
     {
         private readonly List<MerchandiseItem> _merchandiseItems = new List<MerchandiseItem>();
 
-        private const double Kurs = 61.41;
+        private const double Kurs = 1;//61.41;
         
         public MainForm()
         {
