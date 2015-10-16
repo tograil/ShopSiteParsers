@@ -48,11 +48,12 @@ namespace ShopSiteParsers
                 }
 
                 cbCategories.Items.Add("All");
-                //cbCategories.Items.AddRange(_merchandiseItems.GroupBy(item => item.Category).Select(catItem => (object)catItem.Key).ToArray());
-                //cbCategories.SelectedIndex = 0;
+                cbCategories.Items.AddRange(_merchandiseItems.GroupBy(item => item.CategoriesPath[0]).Select(catItem => (object)catItem.Key).ToArray());
+                cbCategories.SelectedIndex = 0;
                 tbPriceMultiplier.Visible = true;
                 chMult.Visible = true;
                 cbCategories.Visible = true;
+                cbSubcat.Visible = true;
                 btExport.Enabled = true;
             }));
         }
@@ -91,15 +92,22 @@ namespace ShopSiteParsers
 
             MerchandiseItem[] listToExport;
 
-			if (cbCategories.SelectedItem== null || cbCategories.SelectedItem.ToString() == "All")
+            if (cbCategories.SelectedItem == null || cbCategories.SelectedItem.ToString() == "All")
                 listToExport = _merchandiseItems.ToArray();
             else
-                listToExport = _merchandiseItems.GroupBy(item => item.Category)
-                .First(item => item.Key == cbCategories.SelectedItem.ToString()).ToArray();
+            {
+                listToExport = _merchandiseItems.GroupBy(item => item.CategoriesPath[0])
+                    .First(item => item.Key == cbCategories.SelectedItem.ToString()).ToArray();
 
-	        var maxCategories = _merchandiseItems.Max(item => item.CategoriesPath != null ? item.CategoriesPath.Length : 2);
+                if (cbSubcat.SelectedItem != null)
+                {
+                    listToExport = listToExport.Where(item => item.CategoriesPath[1].Equals(cbSubcat.SelectedItem.ToString())).ToArray();
+                }
+            }
 
-            if (_merchandiseItems.Count > 20000)
+            var maxCategories = _merchandiseItems.Max(item => item.CategoriesPath != null ? item.CategoriesPath.Length : 2);
+
+            if (listToExport.Count() > 20000)
             {
                 listToExport = _merchandiseItems.Take(20000).ToArray();
 
@@ -131,7 +139,7 @@ namespace ShopSiteParsers
                 string.Join(",", AddQuotes(listOfMerch.Avail.Color),
                     AddQuotes(listOfMerch.Avail.Quantity.ToString(CultureInfo.InvariantCulture)),
                     AddQuotes(listOfMerch.Avail.Size)),
-                AddQuotes(listOfMerch.Price),
+                listOfMerch.Price,
                 ((chMult.Checked
                     ? double.Parse(listOfMerch.Price, CultureInfo.InvariantCulture)*updater
                     : double.Parse(listOfMerch.Price, CultureInfo.InvariantCulture) + updater)*Kurs).ToString("0.00",
@@ -144,7 +152,10 @@ namespace ShopSiteParsers
                 sb.AppendLine(merchRow);
             }
 
-            using (TextWriter writer = File.CreateText(string.Format("./fn_{0}_{1}.csv", cbCategories.SelectedItem ?? "All", index)))
+
+            var fileName = Guid.NewGuid().ToString();
+
+            using (TextWriter writer = File.CreateText(string.Format("./fn_{0}_{1}.csv", fileName ?? "All", index)))
             {
                 writer.Write(sb.ToString());
             }
@@ -155,5 +166,12 @@ namespace ShopSiteParsers
             return string.Format("\"{0}\"", baseString);
         }
 
+        private void cbCategories_SelectedValueChanged(object sender, EventArgs e)
+        {
+            cbSubcat.Items.Clear();
+
+            if (cbCategories.SelectedItem != null && cbCategories.SelectedItem.ToString() != "All")
+                cbSubcat.Items.AddRange(_merchandiseItems.Where(item => item.CategoriesPath[0].Equals(cbCategories.SelectedItem.ToString()) && item.CategoriesPath.Length > 1).GroupBy(item => item.CategoriesPath[1]).Select(item => (object)item.Key).ToArray());
+        }
     }
 }

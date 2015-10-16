@@ -31,6 +31,7 @@
             this.btnStartParse = new System.Windows.Forms.Button();
             this.lvTovars = new System.Windows.Forms.ListView();
             this.clCategory = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.clSubcategory = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.clCode = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.clName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.clPrice = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -39,7 +40,7 @@
             this.cbCategories = new System.Windows.Forms.ComboBox();
             this.tbPriceMultiplier = new System.Windows.Forms.TextBox();
             this.chMult = new System.Windows.Forms.CheckBox();
-            this.clSubcategory = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.cbSubcat = new System.Windows.Forms.ComboBox();
             this.SuspendLayout();
             // 
             // btnStartParse
@@ -76,6 +77,11 @@
             // clCategory
             // 
             this.clCategory.Text = "Category";
+            // 
+            // clSubcategory
+            // 
+            this.clSubcategory.Text = "Subcategory";
+            this.clSubcategory.Width = 80;
             // 
             // clCode
             // 
@@ -116,6 +122,7 @@
             this.cbCategories.Size = new System.Drawing.Size(181, 21);
             this.cbCategories.TabIndex = 3;
             this.cbCategories.Visible = false;
+            this.cbCategories.SelectedValueChanged += new System.EventHandler(this.cbCategories_SelectedValueChanged);
             // 
             // tbPriceMultiplier
             // 
@@ -136,16 +143,22 @@
             this.chMult.UseVisualStyleBackColor = true;
             this.chMult.Visible = false;
             // 
-            // clSubcategory
+            // cbSubcat
             // 
-            this.clSubcategory.Text = "Subcategory";
-            this.clSubcategory.Width = 80;
+            this.cbSubcat.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbSubcat.FormattingEnabled = true;
+            this.cbSubcat.Location = new System.Drawing.Point(12, 314);
+            this.cbSubcat.Name = "cbSubcat";
+            this.cbSubcat.Size = new System.Drawing.Size(181, 21);
+            this.cbSubcat.TabIndex = 6;
+            this.cbSubcat.Visible = false;
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(614, 320);
+            this.ClientSize = new System.Drawing.Size(614, 349);
+            this.Controls.Add(this.cbSubcat);
             this.Controls.Add(this.chMult);
             this.Controls.Add(this.tbPriceMultiplier);
             this.Controls.Add(this.cbCategories);
@@ -174,6 +187,7 @@
         private System.Windows.Forms.TextBox tbPriceMultiplier;
         private System.Windows.Forms.CheckBox chMult;
         private System.Windows.Forms.ColumnHeader clSubcategory;
+        private System.Windows.Forms.ComboBox cbSubcat;
     }
 }
 
